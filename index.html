@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alex Park · Game Design Portfolio</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #100826;
+    --panel: #181033;
+    --dark: #0a0618;
+    --cream: #fff8dc;
+    --cyan: #55f6ff;
+    --pink: #ff4fa3;
+    --yellow: #ffe45c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: "Space Mono", monospace;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  /* CRT 掃描線 */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+    background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgb(0 0 0 / 9%) 3px, rgb(0 0 0 / 9%) 4px);
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; color: inherit; background: none; cursor: pointer; }
+  ::selection { background: var(--pink); color: #fff; }
+  .pixel { font-family: "Press Start 2P", monospace; }
+  .wrap { max-width: 1360px; margin: 0 auto; }
+  .eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .18em; }
+  svg.arrow { width: 16px; height: 16px; }
+
+  /* ===== 導覽列 ===== */
+  header {
+    position: fixed; inset: 0 0 auto 0; z-index: 50;
+    border-bottom: 4px solid var(--cyan);
+    background: rgb(16 8 38 / 95%);
+    box-shadow: 0 4px 0 var(--pink);
+  }
+  .nav-inner {
+    max-width: 1440px; height: 72px; margin: 0 auto; padding: 0 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .badge {
+    width: 32px; height: 32px; display: grid; place-items: center;
+    border: 2px solid #000; background: var(--yellow); color: #000;
+    font-size: 9px; font-weight: 700; box-shadow: 3px 3px 0 var(--pink);
+  }
+  .brand .name { font-size: 10px; }
+  nav.desktop { display: none; gap: 32px; }
+  nav.desktop a {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .14em;
+    color: rgb(255 255 255 / 60%); transition: color .2s;
+  }
+  nav.desktop a:hover { color: #fff; }
+  .arcade-button {
+    display: none; align-items: center; gap: 8px; padding: 12px 20px;
+    border: 2px solid #0c0718; background: var(--yellow); color: #000;
+    box-shadow: 4px 4px 0 var(--pink);
+    font-family: "Press Start 2P", monospace; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .arcade-button:hover { box-shadow: 2px 2px 0 var(--pink); transform: translate(2px, 2px); }
+  .menu-btn {
+    width: 40px; height: 40px; display: grid; place-items: center;
+    border: 1px solid rgb(255 255 255 / 20%); border-radius: 50%; font-size: 12px;
+  }
+  .mobile-nav {
+    display: none; flex-direction: column; gap: 20px; padding: 24px 20px;
+    border-top: 1px solid rgb(255 255 255 / 10%); background: #0c0d0c; font-size: 20px;
+    text-transform: capitalize;
+  }
+  .mobile-nav.open { display: flex; }
+
+  /* ===== 首頁 Hero ===== */
+  .hero {
+    position: relative; min-height: 100vh; overflow: hidden;
+    display: flex; align-items: flex-end; padding: 128px 20px 48px;
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(rgb(85 246 255 / 10%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(85 246 255 / 10%) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to bottom, var(--bg) 0%, transparent 30%, var(--bg) 95%);
+  }
+  .hero > * { position: relative; z-index: 2; }
+  .hero-glow {
+    position: absolute !important; z-index: 1 !important; top: 18%; right: 8%;
+    width: min(54vw, 720px); height: min(54vw, 720px); border-radius: 50%;
+    background: var(--pink); filter: blur(150px); opacity: .1;
+  }
+  .hero .wrap { width: 100%; max-width: 1360px; }
+  .player {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 40px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .18em;
+    color: rgb(255 255 255 / 55%);
+  }
+  .pulse {
+    width: 8px; height: 8px; flex: none; background: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan); animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: .35; } }
+  h1.title {
+    font-size: clamp(2.7rem, 8.5vw, 8rem); line-height: 1.05; letter-spacing: -.05em;
+    max-width: 1200px; font-weight: 400;
+  }
+  .text-outline { color: var(--cyan); text-shadow: 6px 6px 0 var(--pink); }
+  .hero-bottom {
+    margin-top: 48px; padding-top: 24px; border-top: 1px solid rgb(255 255 255 / 15%);
+    display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
+  }
+  .hero-bottom p { max-width: 576px; color: rgb(255 255 255 / 55%); font-size: 16px; line-height: 1.65; }
+  .explore {
+    display: flex; width: fit-content; align-items: center; gap: 16px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .15em;
+  }
+  .explore .box {
+    width: 44px; height: 44px; display: grid; place-items: center;
+    border: 2px solid rgb(255 255 255 / 40%); background: var(--pink); box-shadow: 4px 4px 0 var(--cyan);
+  }
+
+  /* ===== 遊戲選擇 ===== */
+  section.block { padding: 96px 20px; }
+  .games-head { margin-bottom: 56px; display: flex; align-items: flex-end; justify-content: space-between; }
+  .games-head .eyebrow { color: var(--cyan); margin-bottom: 16px; }
+  .games-head h2 { font-size: 30px; line-height: 1.25; font-weight: 400; }
+  .games-head .side { display: none; max-width: 320px; text-align: right; font-size: 14px; line-height: 1.65; color: rgb(255 255 255 / 45%); }
+  .game-grid { display: grid; gap: 16px; }
+  .game-card {
+    overflow: hidden; border: 3px solid var(--cream); background: var(--panel);
+    box-shadow: 7px 7px 0 rgb(85 246 255 / 35%);
+    transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+  }
+  .game-card:hover { border-color: var(--yellow); box-shadow: 7px 7px 0 var(--pink); transform: translate(-2px, -5px); }
+  .game-card-art {
+    position: relative; min-height: 290px; overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, rgb(255 255 255 / 7%), transparent 55%), var(--dark);
+  }
+  .game-card-art .num {
+    position: absolute; left: 20px; top: 20px; z-index: 10;
+    font-size: 12px; font-weight: 700; letter-spacing: .15em; color: rgb(255 255 255 / 45%);
+  }
+  .card-body { padding: 24px; }
+  .card-body .genre { margin-bottom: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .13em; }
+  .card-body h3 { font-size: 18px; line-height: 1.6; font-weight: 400; }
+  .card-body .desc { margin-top: 12px; min-height: 72px; font-size: 14px; line-height: 1.65; color: rgb(255 255 255 / 45%); }
+  .select-btn {
+    margin-top: 28px; width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding-top: 20px; border-top: 2px dashed rgb(255 255 255 / 25%);
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .14em;
+    transition: color .2s;
+  }
+  .game-card:hover .select-btn { color: var(--cyan); }
+
+  /* 遊戲圖示 */
+  .mark { position: absolute; inset: 0; margin: auto; width: 230px; height: 230px; }
+  .signal-orbit { position: absolute; inset: 0; margin: auto; border: 1px solid rgb(255 255 255 / 30%); border-radius: 50%; }
+  .signal-orbit.o1 { width: 180px; height: 180px; }
+  .signal-orbit.o2 { width: 120px; height: 120px; border-style: dashed; animation: spin 18s linear infinite; }
+  .signal-orbit.o3 { width: 220px; height: 70px; transform: rotate(-28deg); }
+  .signal-core { position: absolute; inset: 0; margin: auto; width: 32px; height: 32px; border-radius: 50%; box-shadow: 0 0 50px currentColor; }
+  .mark.afterlight { overflow: hidden; border-radius: 50%; background: linear-gradient(#36233e, #f17859); }
+  .afterlight-sun { position: absolute; top: 45px; right: 46px; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 0 30px rgb(255 107 74 / 50%); }
+  .afterlight-land { position: absolute; right: -25%; bottom: -30%; left: -25%; height: 65%; border-radius: 50% 50% 0 0; }
+  .afterlight-land.l1 { background: #1a191d; transform: rotate(8deg); }
+  .afterlight-land.l2 { right: 20%; bottom: -42%; left: -45%; background: #27242b; }
+  .afterlight-player { position: absolute; bottom: 50px; left: 100px; width: 12px; height: 25px; border-radius: 8px 8px 3px 3px; background: #f7f3e8; box-shadow: 0 0 15px rgb(255 255 255 / 50%); }
+  .mark.kingdom { transform: rotateX(58deg) rotateZ(45deg); transform-style: preserve-3d; }
+  .kingdom-tile { position: absolute; width: 95px; height: 95px; border: 1px solid rgb(255 255 255 / 18%); background: #254238; box-shadow: inset 0 0 35px rgb(0 0 0 / 25%); }
+  .kingdom-tile.t1 { top: 15px; left: 15px; }
+  .kingdom-tile.t2 { top: 115px; left: 15px; }
+  .kingdom-tile.t3 { top: 15px; left: 115px; }
+  .kingdom-tower {
+    position: absolute; top: 56px; left: 56px; z-index: 3; width: 0; height: 0;
+    border-right: 30px solid transparent; border-bottom: 100px solid; border-left: 30px solid transparent;
+    transform: rotateZ(-45deg) rotateX(-50deg);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== 試玩區 ===== */
+  .play-zone {
+    position: relative; overflow: hidden; padding: 96px 20px; color: var(--cream);
+    border-block: 4px solid var(--cyan);
+    background:
+      linear-gradient(90deg, rgb(255 79 163 / 9%) 1px, transparent 1px),
+      linear-gradient(rgb(255 79 163 / 9%) 1px, transparent 1px), var(--panel);
+    background-size: 32px 32px;
+    box-shadow: inset 0 8px 0 rgb(255 79 163 / 45%), inset 0 -8px 0 rgb(255 79 163 / 45%);
+  }
+  .play-head { margin-bottom: 40px; display: grid; gap: 32px; }
+  .play-head .eyebrow { margin-bottom: 12px; }
+  .play-head h2 { font-size: 30px; line-height: 1.25; font-weight: 400; color: var(--yellow); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tab {
+    border: 2px solid var(--cream); padding: 8px 16px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    transition: background .2s;
+  }
+  .tab:hover { background: rgb(255 255 255 / 10%); }
+  .tab.active { background: var(--pink); color: #fff; box-shadow: 3px 3px 0 var(--cyan); }
+  .game-shell { overflow: hidden; border: 10px solid #080512; box-shadow: 10px 10px 0 var(--pink), -6px -6px 0 var(--cyan); }
+  .game-toolbar {
+    height: 42px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; border-bottom: 3px solid var(--cyan); background: var(--panel);
+  }
+  .dots { display: flex; align-items: center; gap: 8px; }
+  .dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .dots span:nth-child(1) { background: #ff685e; }
+  .dots span:nth-child(2) { background: #ffbf39; }
+  .dots span:nth-child(3) { background: #38c957; }
+  .game-toolbar .t { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: rgb(255 255 255 / 45%); }
+  .game-toolbar .r { font-size: 10px; font-weight: 700; color: rgb(255 255 255 / 30%); }
+  .game-stage { height: 520px; background: #080512; }
+  .game-stage iframe { width: 100%; height: 100%; border: 0; }
+  .placeholder {
+    position: relative; width: 100%; height: 100%; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 24px; text-align: center;
+  }
+  .stage-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 3%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 3%) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(circle, black, transparent 70%);
+    mask-image: radial-gradient(circle, black, transparent 70%);
+  }
+  .placeholder .mark { position: relative; inset: auto; z-index: 2; flex: none; margin: -35px 0; transform: scale(.56); }
+  .placeholder .mark.kingdom { transform: scale(.56) rotateX(58deg) rotateZ(45deg); }
+  .placeholder .msg { position: relative; z-index: 10; margin-top: 32px; max-width: 512px; }
+  .ready {
+    display: inline-block; margin-bottom: 16px; padding: 8px 12px;
+    border: 2px solid var(--cyan); background: var(--bg); color: var(--cyan);
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .15em;
+  }
+  .placeholder h3 { font-size: 18px; line-height: 1.6; font-weight: 400; }
+  .placeholder p { margin: 12px auto 0; max-width: 448px; font-size: 14px; line-height: 1.65; color: rgb(255 255 255 / 45%); }
+  .play-foot {
+    margin-top: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+  }
+  .play-foot .tip { color: rgb(255 255 255 / 45%); }
+
+  /* ===== 關於 ===== */
+  .about-grid { display: grid; gap: 56px; }
+  .about .eyebrow { color: var(--cyan); margin-bottom: 20px; }
+  .about-visual {
+    position: relative; min-height: 420px; overflow: hidden;
+    border: 3px solid var(--yellow);
+    background: linear-gradient(135deg, transparent 49.5%, rgb(255 79 163 / 22%) 50%, transparent 50.5%), var(--panel);
+    box-shadow: 8px 8px 0 var(--pink);
+  }
+  .about-cube { position: absolute; width: 110px; height: 110px; border: 3px solid rgb(85 246 255 / 80%); transform: rotate(30deg) skew(-8deg); }
+  .about-cube.c1 { top: 72px; left: 25%; }
+  .about-cube.c2 { top: 155px; left: 45%; border-color: rgb(255 79 163 / 80%); }
+  .about-cube.c3 { top: 100px; left: 58%; border-color: rgb(255 228 92 / 80%); }
+  .about-visual p { position: absolute; bottom: 24px; left: 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; color: rgb(255 255 255 / 50%); }
+  .about h2 { font-size: 36px; line-height: 1.05; letter-spacing: -.055em; font-weight: 600; }
+  .about h2 span { color: var(--pink); }
+  .about-cols { margin-top: 48px; padding-top: 32px; border-top: 1px solid rgb(255 255 255 / 15%); display: grid; gap: 32px; }
+  .about-cols p { line-height: 1.65; color: rgb(255 255 255 / 50%); }
+  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tools span {
+    padding: 12px 16px; border: 2px solid rgb(85 246 255 / 40%); background: rgb(85 246 255 / 5%);
+    font-size: 14px; color: rgb(255 255 255 / 65%);
+  }
+
+  footer { padding: 32px 20px; border-top: 1px solid rgb(255 255 255 / 10%); }
+  footer .wrap {
+    display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
+    font-size: 12px; text-transform: uppercase; letter-spacing: .13em; color: rgb(255 255 255 / 35%);
+  }
+
+  /* ===== 電腦版 ===== */
+  @media (min-width: 768px) {
+    .nav-inner { padding: 0 40px; }
+    nav.desktop { display: flex; }
+    .arcade-button { display: flex; }
+    .menu-btn, .mobile-nav { display: none !important; }
+    .hero { padding: 128px 40px 64px; background-size: 80px 80px; }
+    .hero-bottom { flex-direction: row; align-items: flex-end; }
+    .hero-bottom p { font-size: 18px; }
+    section.block, .play-zone { padding: 128px 40px; }
+    .games-head h2, .play-head h2 { font-size: 48px; }
+    .games-head .side { display: block; }
+    .play-foot, footer .wrap { flex-direction: row; }
+    .about h2 { font-size: 60px; }
+    .about-cols { grid-template-columns: 1fr 1fr; }
+    footer { padding: 32px 40px; }
+    .placeholder h3 { font-size: 24px; }
+    .game-stage { height: auto; aspect-ratio: 16 / 9; min-height: 300px; }
+    .game-card-art { min-height: 340px; }
+    .placeholder .mark { margin: 0; transform: scale(.72); }
+    .placeholder .mark.kingdom { transform: scale(.72) rotateX(58deg) rotateZ(45deg); }
+  }
+  @media (min-width: 1024px) {
+    .game-grid { grid-template-columns: repeat(3, 1fr); }
+    .play-head { grid-template-columns: 1fr auto; align-items: end; }
+    .about-grid { grid-template-columns: .7fr 1.3fr; gap: 96px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- 導覽列 -->
+  <header>
+    <div class="nav-inner">
+      <a href="#top" class="brand">
+        <span class="badge">AP</span>
+        <span class="name pixel">ALEX PARK</span>
+      </a>
+      <nav class="desktop">
+        <a href="#games">Games</a>
+        <a href="#play">Play</a>
+        <a href="#about">About</a>
+      </nav>
+      <a href="#play" class="arcade-button">Insert coin
+        <svg class="arrow" style="transform:rotate(90deg)" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="pixel" id="menuIcon">III</span>
+      </button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="#games">games</a>
+      <a href="#play">play</a>
+      <a href="#about">about</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section id="top" class="hero">
+    <div class="hero-glow"></div>
+    <div class="wrap">
+      <div class="player"><span class="pulse"></span>Player 01 · Game design portfolio · Spring 2025</div>
+      <h1 class="title pixel">SMALL GAMES.<br><span class="text-outline">BIG WORLDS.</span></h1>
+      <div class="hero-bottom">
+        <p>A collection of Unity games I designed, developed, and shipped this semester—from first prototype to final build.</p>
+        <a href="#games" class="explore">Explore the games
+          <span class="box"><svg class="arrow" style="transform:rotate(90deg)" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 遊戲選擇 -->
+  <section id="games" class="block">
+    <div class="wrap">
+      <div class="games-head">
+        <div>
+          <p class="eyebrow">Select your game</p>
+          <h2 class="pixel">Three experiments</h2>
+        </div>
+        <p class="side">Each game explores a different mechanic, visual system, and technical challenge.</p>
+      </div>
+      <div class="game-grid" id="gameGrid"></div>
+    </div>
+  </section>
+
+  <!-- 試玩區 -->
+  <section id="play" class="play-zone">
+    <div class="wrap">
+      <div class="play-head">
+        <div>
+          <p class="eyebrow">Playable WebGL build</p>
+          <h2 class="pixel" id="playTitle"></h2>
+        </div>
+        <div class="tabs" id="tabs"></div>
+      </div>
+
+      <div class="game-shell">
+        <div class="game-toolbar">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <p class="t">Unity WebGL Player</p>
+          <span class="r">16:9</span>
+        </div>
+        <div class="game-stage" id="stage"></div>
+      </div>
+
+      <div class="play-foot">
+        <p id="controls"></p>
+        <p class="tip">Tip: click the game before using keyboard controls</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 關於 -->
+  <section id="about" class="block about">
+    <div class="wrap about-grid">
+      <div>
+        <p class="eyebrow">Behind the builds</p>
+        <div class="about-visual">
+          <span class="about-cube c1"></span>
+          <span class="about-cube c2"></span>
+          <span class="about-cube c3"></span>
+          <p>Made with Unity + C#</p>
+        </div>
+      </div>
+      <div>
+        <h2>This semester, I learned that making games is equal parts <span>code, craft, and curiosity.</span></h2>
+        <div class="about-cols">
+          <p>Each project pushed me into new territory: player controllers, state machines, procedural systems, level design, UI, sound, and the endless art of debugging.</p>
+          <div class="tools">
+            <span>Unity</span><span>C#</span><span>Blender</span><span>ProBuilder</span><span>Git</span><span>FMOD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p>Alex Park · Game Design Portfolio</p>
+      <p>Spring semester 2025</p>
+    </div>
+  </footer>
+</main>
+
+<script>
+  /* ================================================================
+     只需要改這裡：把 Unity WebGL 資料夾放進 games/ 之後，
+     把 buildUrl 改成對應路徑，例如 "games/signal-lost/index.html"
+     ================================================================ */
+  const games = [
+    {
+      id: "signal-lost", number: "01", title: "Signal Lost", genre: "Atmospheric puzzle",
+      description: "Restore a broken signal network while navigating a quiet, abandoned research station.",
+      controls: "WASD to move · Mouse to look · E to interact",
+      accent: "#55f6ff",
+      buildUrl: ""   // 例："games/signal-lost/index.html"
+    },
+    {
+      id: "afterlight", number: "02", title: "Afterlight", genre: "2D platformer",
+      description: "Chase the last light through a collapsing world in this fast, precise platformer.",
+      controls: "A/D to move · Space to jump · Shift to dash",
+      accent: "#ff4fa3",
+      buildUrl: ""
+    },
+    {
+      id: "tiny-kingdoms", number: "03", title: "Tiny Kingdoms", genre: "Strategy sandbox",
+      description: "Build a tiny civilization, balance its resources, and help it survive the changing seasons.",
+      controls: "Mouse to select · Scroll to zoom · R to rotate",
+      accent: "#ffe45c",
+      buildUrl: ""
+    }
+  ];
+
+  const arrow = '<svg class="arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function markHTML(g) {
+    if (g.id === "signal-lost") {
+      return `<div class="mark" aria-hidden="true"><span class="signal-orbit o1"></span><span class="signal-orbit o2"></span><span class="signal-orbit o3"></span><span class="signal-core" style="background:${g.accent};color:${g.accent}"></span></div>`;
+    }
+    if (g.id === "afterlight") {
+      return `<div class="mark afterlight" aria-hidden="true"><span class="afterlight-sun" style="background:${g.accent}"></span><span class="afterlight-land l1"></span><span class="afterlight-land l2"></span><span class="afterlight-player"></span></div>`;
+    }
+    return `<div class="mark kingdom" aria-hidden="true"><span class="kingdom-tile t1"></span><span class="kingdom-tile t2"></span><span class="kingdom-tile t3"></span><span class="kingdom-tower" style="border-bottom-color:${g.accent}"></span></div>`;
+  }
+
+  let selected = games[0];
+
+  // 遊戲卡片
+  document.getElementById("gameGrid").innerHTML = games.map((g, i) => `
+    <article class="game-card">
+      <div class="game-card-art">
+        <span class="num">${g.number} / 03</span>
+        ${markHTML(g)}
+      </div>
+      <div class="card-body">
+        <p class="genre" style="color:${g.accent}">${g.genre}</p>
+        <h3 class="pixel">${g.title}</h3>
+        <p class="desc">${g.description}</p>
+        <button type="button" class="select-btn" data-i="${i}">Select &amp; play ${arrow}</button>
+      </div>
+    </article>`).join("");
+
+  // 試玩區
+  function renderPlay() {
+    document.getElementById("playTitle").textContent = selected.title;
+    document.getElementById("controls").textContent = selected.controls;
+    document.getElementById("tabs").innerHTML = games.map((g, i) =>
+      `<button type="button" class="tab${g.id === selected.id ? " active" : ""}" data-i="${i}">${g.number} ${g.title}</button>`
+    ).join("");
+
+    const stage = document.getElementById("stage");
+    if (selected.buildUrl) {
+      stage.innerHTML = `<iframe src="${selected.buildUrl}" title="Play ${selected.title}" allowfullscreen></iframe>`;
+    } else {
+      stage.innerHTML = `
+        <div class="placeholder">
+          <div class="stage-grid"></div>
+          ${markHTML(selected)}
+          <div class="msg">
+            <span class="ready">Ready player one</span>
+            <h3 class="pixel">Drop your Unity WebGL build here</h3>
+            <p>Export this game for WebGL, place it in the games folder, then add its path to the games list.</p>
+          </div>
+        </div>`;
+    }
+  }
+
+  document.getElementById("gameGrid").addEventListener("click", e => {
+    const btn = e.target.closest(".select-btn");
+    if (!btn) return;
+    selected = games[+btn.dataset.i];
+    renderPlay();
+    setTimeout(() => document.querySelector("#play").scrollIntoView({ behavior: "smooth" }), 50);
+  });
+  document.getElementById("tabs").addEventListener("click", e => {
+    const btn = e.target.closest(".tab");
+    if (!btn) return;
+    selected = games[+btn.dataset.i];
+    renderPlay();
+  });
+  renderPlay();
+
+  // 手機選單
+  const menuBtn = document.getElementById("menuBtn");
+  const mobileNav = document.getElementById("mobileNav");
+  function setMenu(open) {
+    mobileNav.classList.toggle("open", open);
+    menuBtn.setAttribute("aria-expanded", open);
+    document.getElementById("menuIcon").textContent = open ? "X" : "III";
+  }
+  menuBtn.addEventListener("click", () => setMenu(!mobileNav.classList.contains("open")));
+  mobileNav.addEventListener("click", e => { if (e.target.tagName === "A") setMenu(false); });
+</script>
+</body>
+</html>
